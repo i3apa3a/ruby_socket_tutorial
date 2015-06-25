@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby -w
 require "socket"
+require "optparse"
 class Client
   def initialize( server )
     @server = server
@@ -30,6 +31,25 @@ class Client
     end
   end
 end
+
+OptionParser.new do |opts|
+  opts.version = "0.0.1"
+  $port = 1337
+  # Argument must match a regular expression.
+  opts.on("-p", "--port PORT") {|arg| $port = arg.to_i}
+  begin
+    # Parse and remove options from ARGV.
+    opts.parse!
+  rescue OptionParser::ParseError => error
+    # Without this rescue, Ruby would print the stack trace
+    # of the error. Instead, we want to show the error message,
+    # suggest -h or --help, and exit 1.
  
-server = TCPSocket.open( "localhost", 13337 )
+    $stderr.puts error
+    $stderr.puts "(-h or --help will show valid options)"
+    exit 1
+  end
+end
+ 
+server = TCPSocket.open( "localhost", $port )
 Client.new( server )
